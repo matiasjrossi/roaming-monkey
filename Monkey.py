@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/python
 # coding: latin-1
 
 
@@ -100,7 +100,6 @@ def configureLogger(logfile):
 	for handler in rootLogger.handlers:
 		handler.setFormatter(fmt)
 		
-	# rootLogger.setLevel(logging.DEBUG)
 	rootLogger.setLevel(logging.WARNING)
 
 
@@ -150,8 +149,6 @@ class Monkey:
 		
 		self.configFile = configFile
 
-		self.parseConfig()
-
 		self.AMI = AsteriskManagerFactory()
 
 		self.AMI.registerEventHandler('onAuthenticationAccepted', self.onAuthenticationAccepted)
@@ -160,10 +157,8 @@ class Monkey:
 		self.AMI.registerEventHandler('PeerStatus',	self.handlerPeerStatus)
 		self.AMI.registerEventHandler('Bridge',		self.handlerBridge)
 		self.AMI.registerEventHandler('Hangup',		self.handlerHangup)
-
-		for server in self.servers:
-			s = self.servers[server]
-			self.AMI.addServer(server, s['hostname'], s['hostport'], s['username'], s['password'])
+		
+		self.initialize()
 		
 
 		
@@ -172,6 +167,19 @@ class Monkey:
 		log.debug('Monkey.clearStatus :: Cleaning status')
 		
 		servers = None
+
+
+		
+	def initialize(self):
+		
+		log.debug('Monkey.initialize :: Running... ')
+		
+		self.parseConfig()
+
+		for server in self.servers:
+			s = self.servers[server]
+			self.AMI.addServer(server, s['hostname'], s['hostport'], s['username'], s['password'])
+
 
 	
 	def parseConfig(self):
@@ -272,7 +280,7 @@ class Monkey:
 				
 			# Mark the user as 'not ready'.
 			# Will be available after we are done with server authentication and configuration fetching.
-			# self.servers[server]['clients'][user]['ready'] = False;
+			self.servers[server]['clients'][user]['ready'] = False;
 
 	##
 	## AMI Handlers for Events
@@ -393,21 +401,21 @@ class Monkey:
 			self.servers[server]['clients'][user]['talking_with'] = None
 
 	
-	# def getConfigHandler(self, event):
+	def getConfigHandler(self, event):
 
-	# 	log.debug('Monkey.getConfigHandler :: Running...')
+		log.debug('Monkey.getConfigHandler :: Running...')
 		
-	# 	server	= event['Server']
-	# 	user	= event['Category-000000']
+		server	= event['Server']
+		user	= event['Category-000000']
 		
-	# 	eventKeys = event.keys()
-	# 	eventKeys.sort()
+		eventKeys = event.keys()
+		eventKeys.sort()
 		
-	# 	for key in eventKeys:
-	# 		if key.startswith('Line-'):
-	# 			log.warning('LINE: %s' % event[key])
+		for key in eventKeys:
+			if key.startswith('Line-'):
+				log.warning('LINE: %s' % event[key])
 		
-	# 	self.servers[server]['clients'][user]['ready'] = True
+#		log.debug(repr(event))
 	
 	
 	def onAuthenticationAccepted(self, event):
@@ -418,14 +426,14 @@ class Monkey:
 		
 		
 		# Read 'qualify' and 'qualifyfreq' values from sip.conf.
-		# for user in self.servers[server]['clients'].keys():
-		# 	action = {
-		# 			'Action'	: 'GetConfig',
-		# 			'Filename'	: self.sipConfFilename(server),
-		# 			'Category'	: user
-		# 			}
+		for user in self.servers[server]['clients'].keys():
+			action = {
+					'Action'	: 'GetConfig',
+					'Filename'	: self.sipConfFilename(server),
+					'Category'	: user
+					}
 
-		# 	self.AMI.execute(Server = server, Action = action, Handler = self.getConfigHandler)
+			self.AMI.execute(Server = server, Action = action, Handler = self.getConfigHandler)
 		
 		self._askStatus(server)
 
@@ -455,9 +463,9 @@ class Monkey:
 	def setQualification(self, server, user, qualify, qualifyfreq):
 		log.debug('Monkey.setQualify :: Running...')
 		
-		# if not self.servers[server]['clients'][user]['ready']:
-		# 	log.warning('Monkey.setQualify :: NO! I will not qualify user %s until it is ready!' % user)
-		# 	return
+		if not self.servers[server]['clients'][user]['ready']:
+			log.warning('Monkey.setQualify :: NO! I will not qualify user %s until it is ready!' % user)
+			return
 		
 		log.debug('Monkey.setQualify :: Going to qualify %s with q=%s qf=%s' % (user, qualify, qualifyfreq))
 		

@@ -106,8 +106,8 @@ class AsteriskManagerProtocol(basic.LineOnlyReceiver):
 	
 	def login(self):
 		log.debug('AsteriskManagerProtocol.login (Server: %s) :: Logging in...' % (self.server))
-		lines      = ['Action: login', 'Username: %s' % self.username, 'Secret: %s' % self.password, 'Events: on']
-		linesDebug = ['Action: login', 'Username: %s' % self.username, 'Secret: ********', 'Events: on']
+		lines      = ['Action: login', 'Username: %s' % self.username, 'Secret: %s' % self.password]
+		linesDebug = ['Action: login', 'Username: %s' % self.username, 'Secret: ********']
 		log.debug('AsteriskManagerProtocol.login.login (Server: %s) :: Sending: %s' % (self.server, linesDebug))
 		for line in lines:
 			self.sendLine(line)

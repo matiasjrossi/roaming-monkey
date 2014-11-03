@@ -1,0 +1,16 @@
+Manual installation instructions
+================================
+
+1) Drop the contents of this directory in /opt/monkey
+2) Make sure ownership of all the items and the directory itself is root:root
+3) Symlink monkey-init-script to /etc/init.d/monkey
+4) Copy monkey.conf.example to /etc/monkey.conf and modify it to match your
+   Asterisk server
+   NOTE: For this tool to communicate with Asterisk an AMI user hast to be set
+   up. There is an example file manager.d.monkey.conf.example that can be used
+   by copying it to /etc/asterisk/manager.d/monkey.conf.
+5) Start the daemon by calling /etc/init.d/monkey start, or
+   /sbin/service monkey start, or whatever your distribution of choice
+   recommends
+6) Profit
+

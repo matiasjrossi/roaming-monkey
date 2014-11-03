@@ -1,0 +1,119 @@
+## Roaming Monkey example configuration file
+############################################
+##
+## Servers Definitions
+######################
+## You should be able to define as many asterisk servers as you want. Hopefully
+## Roaming Monkey will handle them correctly ;-)
+##
+## Every server has its own section. The section starts with a header delimited
+## by square brackets, specifying the server name (which will be used
+## internally as an ID). For this reason server names must be unique.
+## NOTE: Server names CANNOT contain whitespace.
+[server: mypbx]
+
+##
+## Within the server definition there are many mandatory parameters. At first
+## you need to tell the monkey where on the network your Asterisk PBX is
+## running. If you installed the monkey in the same machine then you can just
+## use 'localhost' or '127.0.0.1'.
+## Bare in mind that the monkey interacts with asterisk over TCP, so if you
+## install both on different machines, you might want to check for any firewall
+## or filter between them. 
+hostname = mypbx.mydomain
+
+##
+## Also Roaming Monkey needs to know in which TCP port is Asterisk Manager
+## Interface (AMI) listening for incoming connections. In most cases you're
+## good to go with the standard port (5038)
+hostport = 5038
+
+##
+## Also we need to let the monkey authenticate with AMI. After you add a user
+## for Roaming Monkey in the Asterisk Manager configuration files (probably
+## under /etc/asterisk/manager.d/) you need to add those credentials here.
+## Roaming monkey needs the following privileges to be fully operative:
+##   <TODO>
+username = monkey
+password = bananas
+
+##
+## After the monkey notices a user slipped out of the (W)LAN, it will tell
+## Asterisk to process the orphan channel (The one in the otherside of the
+## interrupted call) within the dialplan. Here you can specify in which context
+## the dialplan execution will begin for this server
+redirect_context = monkey_target
+
+##
+## Roaming Monkey modifies sip module's configuration to force asterisk detect
+## when a client falls out of the (W)LAN.
+## Since some asterisk distributors (i.e. Trixbox) make use of included
+## configuration files to provide greater customization than its UI allows you
+## might need to specify a specific file when the monkey should make its
+## changes.
+## Defaults to 'sip.conf'
+#sip_conf_filename = 
+
+##
+## Since some client devices/software might response differently to asterisk
+## qualification method, it is posible to tweak the values used by the monkey.
+## Define these settings in the server definition section to apply them
+## server-wide. If you need to tweak this values in a per client basis, these
+## can be defined within a client definition section. (See below) 
+## NOTE: Most users won't need to change this at all.
+## WARNING: Since this was only tested with defaults, values too far from those
+## could make the monkey misbehave.
+##
+## How much time (in milliseconds) to wait for an answer before considering the
+## client as gone. You can increase this parameter to avoid unexpected
+## redirections (false positives) in networks with high latency.
+## Defaults to '1000'
+#oncall_qualify =
+
+##
+## How often should asterisk send a qualify test packet to the client. Higher
+## values decrease network overhead, but also the redirection detection is less
+## accurate. Only increase it if you believe your network is being flooded by
+## the monkey.
+## The value is time in seconds.
+## Defaults to '1'
+#oncall_qualifyfreq =
+
+
+##
+## Clients Definitions
+######################
+## Every monitored client has its own settings in a section delimited with
+## square brackets. As you can monitor many servers, you must map every client
+## to the server it belongs.
+## The syntax is as follows:
+## [client: <server> <user>]
+[client: mypbx 101]
+
+##
+## For each client you need to tell the monkey to which extension (within the
+## server-wide defined context) redirect in the event of (W)LAN connection lose.
+## Chances are you want to put in it the cellular number of the client. That
+## way you can configure your context to dial the extension value through one
+## of your outgoing routes (a.k.a. trunk).  
+redirect_extension = 3330004567
+
+##
+## NOTE: These settings are per client overrides of the same parameters
+## explained in the server section. 
+## WARNING: Since this was only tested with defaults, values too far from those
+## could make the monkey misbehave.
+##
+## The value is time in milliseconds.
+## Defaults to the value of the server. In case both are undefined defaults to
+## '1000' milliseconds.
+#oncall_qualify =
+
+##
+## The value is time in seconds.
+## Defaults to the values specified in the server section. If none, defaults to
+## '1' second.
+#oncall_qualifyfreq =
+
+[client: mypbx 102]
+redirect_extension = 3330001234
